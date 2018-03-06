@@ -31,49 +31,49 @@ dlibModelDir = os.path.join(modelDir, 'dlib')
 openfaceModelDir = os.path.join(modelDir, 'openface')
 
 
-def write(vals, fName):
-    if os.path.isfile(fName):
-        print("{} exists. Backing up.".format(fName))
-        os.rename(fName, "{}.bak".format(fName))
-    with open(fName, 'w') as f:
-        for p in vals:
-            f.write(",".join(str(x) for x in p))
-            f.write("\n")
+# def write(vals, fName):
+#     if os.path.isfile(fName):
+#         print("{} exists. Backing up.".format(fName))
+#         os.rename(fName, "{}.bak".format(fName))
+#     with open(fName, 'w') as f:
+#         for p in vals:
+#             f.write(",".join(str(x) for x in p))
+#             f.write("\n")
 
 
-def computeMeanMain(args):
-    align = openface.AlignDlib(args.dlibFacePredictor)
+# def computeMeanMain(args):
+#     align = openface.AlignDlib(args.dlibFacePredictor)
 
-    imgs = list(iterImgs(args.inputDir))
-    if args.numImages > 0:
-        imgs = random.sample(imgs, args.numImages)
+#     imgs = list(iterImgs(args.inputDir))
+#     if args.numImages > 0:
+#         imgs = random.sample(imgs, args.numImages)
 
-    facePoints = []
-    for img in imgs:
-        rgb = img.getRGB()
-        bb = align.getLargestFaceBoundingBox(rgb)
-        alignedPoints = align.align(rgb, bb)
-        if alignedPoints:
-            facePoints.append(alignedPoints)
+#     facePoints = []
+#     for img in imgs:
+#         rgb = img.getRGB()
+#         bb = align.getLargestFaceBoundingBox(rgb)
+#         alignedPoints = align.align(rgb, bb)
+#         if alignedPoints:
+#             facePoints.append(alignedPoints)
 
-    facePointsNp = np.array(facePoints)
-    mean = np.mean(facePointsNp, axis=0)
-    std = np.std(facePointsNp, axis=0)
+#     facePointsNp = np.array(facePoints)
+#     mean = np.mean(facePointsNp, axis=0)
+#     std = np.std(facePointsNp, axis=0)
 
-    write(mean, "{}/mean.csv".format(args.modelDir))
-    write(std, "{}/std.csv".format(args.modelDir))
+#     write(mean, "{}/mean.csv".format(args.modelDir))
+#     write(std, "{}/std.csv".format(args.modelDir))
 
-    # Only import in this mode.
-    import matplotlib as mpl
-    mpl.use('Agg')
-    import matplotlib.pyplot as plt
+#     # Only import in this mode.
+#     import matplotlib as mpl
+#     mpl.use('Agg')
+#     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots()
-    ax.scatter(mean[:, 0], -mean[:, 1], color='k')
-    ax.axis('equal')
-    for i, p in enumerate(mean):
-        ax.annotate(str(i), (p[0] + 0.005, -p[1] + 0.005), fontsize=8)
-    plt.savefig("{}/mean.png".format(args.modelDir))
+#     fig, ax = plt.subplots()
+#     ax.scatter(mean[:, 0], -mean[:, 1], color='k')
+#     ax.axis('equal')
+#     for i, p in enumerate(mean):
+#         ax.annotate(str(i), (p[0] + 0.005, -p[1] + 0.005), fontsize=8)
+#     plt.savefig("{}/mean.png".format(args.modelDir))
 
 
 def alignMain(args):
@@ -140,7 +140,7 @@ def alignMain(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('inputDir', type=str, help="Input image directory.")
+    parser.add_argument('--inputDir', type=str,default='/home/ankush/Desktop/openFace/openface/training-images', help="Input image directory.")
     parser.add_argument('--dlibFacePredictor', type=str, help="Path to dlib's face predictor.",
                         default=os.path.join(dlibModelDir, "shape_predictor_68_face_landmarks.dat"))
 
@@ -151,13 +151,13 @@ if __name__ == '__main__':
                                    default=0)  # <= 0 ===> all imgs
     alignmentParser = subparsers.add_parser(
         'align', help='Align a directory of images.')
-    alignmentParser.add_argument('landmarks', type=str,
-                                 choices=['outerEyesAndNose',
-                                          'innerEyesAndBottomLip',
-                                          'eyes_1'],
+    alignmentParser.add_argument('--landmarks', type=str,default='outerEyesAndNose',
+                                 # choices=['outerEyesAndNose',
+                                 #          'innerEyesAndBottomLip',
+                                 #          'eyes_1'],
                                  help='The landmarks to align to.')
     alignmentParser.add_argument(
-        'outputDir', type=str, help="Output directory of aligned images.")
+        '--outputDir', type=str, default='/home/ankush/Desktop/openFace/openface/AlignedImages', help="Output directory of aligned images.")
     alignmentParser.add_argument('--size', type=int, help="Default image size.",
                                  default=96)
     alignmentParser.add_argument('--fallbackLfw', type=str,
@@ -167,8 +167,4 @@ if __name__ == '__main__':
     alignmentParser.add_argument('--verbose', action='store_true')
 
     args = parser.parse_args()
-
-    if args.mode == 'computeMean':
-        computeMeanMain(args)
-    else:
-        alignMain(args)
+    alignMain(args)

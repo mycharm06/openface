@@ -108,12 +108,12 @@ def getRep(imgPath, multiple=False):
 
 def train(args):
     print("Loading embeddings.")
-    fname = "{}/labels.csv".format(args.workDir)
+    fname = "{}/labels.csv".format("/home/ankush/Desktop/openFace/openface/generated-embeddings")
     labels = pd.read_csv(fname, header=None).as_matrix()[:, 1]
     labels = map(itemgetter(1),
                  map(os.path.split,
                      map(os.path.dirname, labels)))  # Get the directory.
-    fname = "{}/reps.csv".format(args.workDir)
+    fname = "{}/reps.csv".format("/home/ankush/Desktop/openFace/openface/generated-embeddings")
     embeddings = pd.read_csv(fname, header=None).as_matrix()
     le = LabelEncoder().fit(labels)
     labelsNum = le.transform(labels)
@@ -171,7 +171,7 @@ def train(args):
 
     clf.fit(embeddings, labelsNum)
 
-    fName = "{}/classifier.pkl".format(args.workDir)
+    fName = "{}/classifier.pkl".format("/home/ankush/Desktop/openFace/openface/generated-embeddings")
     print("Saving classifier to '{}'".format(fName))
     with open(fName, 'w') as f:
         pickle.dump((le, clf), f)
@@ -211,7 +211,8 @@ def infer(args, multiple=False):
                 if confidence <= 0.60:
                     print("Wrong face found")
                     print confidence
-                    return "wrong face found"
+                    wrgface="wrong face found"
+                    return wrgface
                 else :
                     confidence=confidence*100
                     pre = "Welcome {}".format(person.decode('utf-8'))
@@ -266,7 +267,7 @@ if __name__ == '__main__':
         help='The type of classifier to use.',
         default='LinearSvm')
     trainParser.add_argument(
-        'workDir',
+        "/home/ankush/Desktop/openFace/openface/generated-embeddings",
         type=str,
         help="The input work directory containing 'reps.csv' and 'labels.csv'. Obtained from aligning a directory with 'align-dlib' and getting the representations with 'batch-represent'.")
 
